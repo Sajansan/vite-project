@@ -5,8 +5,15 @@ import supabase from './supabase-client.js'
 function App() {
   const [todoList, setTodoList] = useState([])
   const [newTodo, setNewTodo] = useState('')
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
+    document.body.className = `${theme}-theme`;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     fetchTodoList()
   }, [])
 
@@ -56,10 +63,19 @@ function App() {
     }
   }
 
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
   return (
     <div className="container">
       <div className="todo-card">
-        <h1>Todo List</h1>
+        <div className="app-header">
+          <h1>Todo List</h1>
+          <button className="theme-switcher" onClick={toggleTheme}>
+            <i className={`fa-solid ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+          </button>
+        </div>
         <div className="input-group">
           <input
             type="text"
@@ -67,24 +83,35 @@ function App() {
             value={newTodo}
             onChange={e => setNewTodo(e.target.value)}
           />
-          <button className="add-btn" onClick={addTodo}>Add Task</button>
+          <button className="add-btn" onClick={addTodo}>
+            <i className="fa-solid fa-plus"></i>
+          </button>
         </div>
         <ul className="todo-list">
           {todoList.map((todo) => (
             <li key={todo.id} className={`todo-item ${todo.isCompleted ? 'completed' : ''}`}>
               <span className="todo-text">{todo.name}</span>
               <div className="actions">
-                <button
-                  className="complete-btn"
-                  onClick={() => toggleComplete(todo.id, todo.isCompleted)}
-                >
-                  {todo.isCompleted ? 'Undo' : 'Complete'}
-                </button>
+                {todo.isCompleted ? (
+                  <button
+                    className="undo-btn"
+                    onClick={() => toggleComplete(todo.id, todo.isCompleted)}
+                  >
+                    <i className="fa-solid fa-rotate-left"></i>
+                  </button>
+                ) : (
+                  <button
+                    className="complete-btn"
+                    onClick={() => toggleComplete(todo.id, todo.isCompleted)}
+                  >
+                    <i className="fa-solid fa-check"></i>
+                  </button>
+                )}
                 <button
                   className="delete-btn"
                   onClick={() => deleteTodo(todo.id)}
                 >
-                  Delete
+                  <i className="fa-solid fa-trash"></i>
                 </button>
               </div>
             </li>
